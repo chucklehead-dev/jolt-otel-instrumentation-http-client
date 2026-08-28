@@ -1,0 +1,14 @@
+{:paths ["src"]
+
+ :deps {io.github.casselc/http-client
+        {:git/url "https://github.com/casselc/http-client.git"
+         :git/sha "8efcd571bb9c217080b2fed965f1af1a5ef5270d"}
+        io.github.casselc/otel
+        {:git/url "https://github.com/casselc/otel.git"
+         :git/sha "cac3cbcf1e7101c0a893c3aaffa5a3154c0f766b"}}
+
+ :aliases
+ {:test {:extra-paths ["test"]
+         :main-opts ["-m" "otel.instrumentation.http-client-test-runner"]}}
+
+ :tasks {test "jolt -M:test"}}

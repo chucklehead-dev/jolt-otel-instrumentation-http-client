@@ -1,0 +1,5 @@
+/.jolt/
+/test-app/.jolt/
+/test-app/target/
+/test-app-plain/.jolt/
+/test-app-plain/target/

@@ -1,0 +1,13 @@
+{:paths ["src"]
+
+ :deps {io.github.chucklehead-dev/jolt-otel-instrumentation-http-client
+        {:local/root ".."}
+        io.github.casselc/jolt-http
+        {:git/url "https://github.com/casselc/jolt-http.git"
+         :git/sha "7737097ba00987f9f851e6527da17ea68b0d5c4f"}}
+
+ :jolt/build
+ {:aspects
+  [{:resource "META-INF/jolt/aspects/http-client-core.edn"
+    :provider otel.instrumentation.http-client}]
+  :aspect-report "target/http-client-aspects.edn"}}
