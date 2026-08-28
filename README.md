@@ -12,12 +12,15 @@ The initial contract instruments the normalized, synchronous
 
 - the canonical `http.request.method`, with unknown methods collapsed to
   `_OTHER` and the span name `HTTP`;
-- `server.address`, `server.port`, `url.scheme`, and a privacy-redacted
-  `url.full` when their safe components are available;
+- `server.address`, `server.port`, `url.scheme`, and a sanitized `url.full`
+  (path and query keys retained, every query value redacted) when their safe
+  components are available;
 - `http.response.status_code`, plus `error.type` and error status for HTTP
-  errors; and
-- a canonical exception type and a message-free exception event when transport
-  work throws.
+  errors;
+- the stable `http.client.request.duration` histogram in seconds with the
+  standard advisory buckets; and
+- a correlated `http.client.request.exception` log event at WARN severity,
+  carrying only the canonical exception type, when transport work throws.
 
 The provider injects the new client span using W3C Trace Context. It removes
 every case spelling of an existing `traceparent` or `tracestate` from a copied
@@ -28,13 +31,13 @@ The default known-method set is the current HTTP semantic-convention set.
 `OTEL_INSTRUMENTATION_HTTP_KNOWN_METHODS` supplies the specified comma-separated,
 case-sensitive full override for applications using extension methods.
 
-Request and response bodies, arbitrary headers, user info, URI paths, query
-strings, fragments, exception messages, and exception data are never retained.
-The redacted URL preserves the HTTP origin, then represents any non-root path
-and any query as `REDACTED`; this is an explicit privacy-first reduction of the
-otherwise-full `url.full` convention. Application results and thrown values
-retain their exact identity. Generic instrumentation suppression bypasses even
-request inspection, preventing exporter and observability-viewer feedback.
+Request and response bodies, arbitrary headers, user info, query values,
+fragments, exception messages, and exception data are never retained. The URL
+path is retained because it is part of the current required sanitized
+`url.full` convention; query keys remain while every value becomes `REDACTED`.
+Application results and thrown values retain their exact identity. Generic instrumentation
+suppression bypasses even request inspection, preventing exporter and
+observability-viewer feedback.
 
 ## Select it in a build
 
@@ -64,24 +67,39 @@ The provider and its library-owned manifest are pinned to exact published
 revisions. From this repository, with the workspace's pinned Chez toolchain:
 
 ```sh
-env JOLT_CACHE_DIR=/home/chuck/.cache/jolt-http-instrumentation-23d46d4c \
-  /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 \
-  /home/chuck/ai-src/worktrees/jolt-aspect-manifest-build-hook/target/release/jolt \
-  -M:test
+env JOLT_GITLIBS_DIR=/home/chuck/.cache/jolt-http-instrumentation-gitlibs \
+  /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 jolt -M:test
 
 cd test-app
-env JOLT_CACHE_DIR=/home/chuck/.cache/jolt-http-instrumentation-build-23d46d4c \
+env JOLT_CACHE_DIR=/home/chuck/.cache/jolt-http-instrumentation-woven \
+  JOLT_GITLIBS_DIR=/home/chuck/.cache/jolt-http-instrumentation-gitlibs \
   /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 \
-  /home/chuck/ai-src/worktrees/jolt-aspect-manifest-build-hook/target/release/jolt \
+  /home/chuck/ai-src/worktrees/jolt-v0728-aspects-ffi-loans/bin/jolt \
   build -m instrumentation-fixture.main \
   -o target/woven-http-client-fixture
 
 target/woven-http-client-fixture
+
+cd ../test-app-plain
+env JOLT_CACHE_DIR=/home/chuck/.cache/jolt-http-instrumentation-plain \
+  JOLT_GITLIBS_DIR=/home/chuck/.cache/jolt-http-instrumentation-gitlibs \
+  /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 \
+  /home/chuck/ai-src/worktrees/jolt-v0728-aspects-ffi-loans/bin/jolt \
+  build -m instrumentation-fixture.main \
+  -o target/plain-http-client-fixture
+
+target/plain-http-client-fixture plain
 ```
+
+The released Jolt v0.7.28 runs the provider and unit tests. Compiler-selected
+aspects are newer than that release, so both binary fixtures deliberately use
+the explicit aspect-capable build shown above. Using the same compiler for both
+fixtures proves that selection, rather than classpath presence, controls weaving.
 
 The compiler fixture makes a real loopback HTTP request. Its server echoes the
 wire `traceparent`, and the application verifies it identifies the generated
-client span and that the span is a direct child of the active parent.
+client span, that the span is a direct child of the active parent, and that the
+matching duration metric carries the method and response status.
 `test-app-plain` builds the same source with the provider and inert manifest on
 the classpath but no `:jolt/build :aspects` selection; running it with `plain`
 verifies that it emits no HTTP span and sends no synthetic trace header.

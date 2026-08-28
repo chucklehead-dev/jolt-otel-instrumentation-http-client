@@ -2,10 +2,10 @@
 
  :deps {io.github.casselc/http-client
         {:git/url "https://github.com/casselc/http-client.git"
-         :git/sha "8efcd571bb9c217080b2fed965f1af1a5ef5270d"}
+         :git/sha "a00979f5e55bc8deb98291993643ff1ccf50a57b"}
         io.github.casselc/otel
         {:git/url "https://github.com/casselc/otel.git"
-         :git/sha "cac3cbcf1e7101c0a893c3aaffa5a3154c0f766b"}}
+         :git/sha "a9badb98a86d4e0aa207aa0609da03dc8e4c087f"}}
 
  :aliases
  {:test {:extra-paths ["test"]
