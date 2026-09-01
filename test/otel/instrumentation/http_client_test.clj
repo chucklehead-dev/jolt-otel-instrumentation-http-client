@@ -18,6 +18,22 @@
    :library {:id 'jolt-lang/http-client
              :version instrumentation/http-client-build-id}})
 
+(def ^:private http-client-revision
+  "19d0d1b21ece1d0be3cdd166746cb0df772fbc0a")
+
+(def ^:private aspect-resource
+  "META-INF/jolt/aspects/http-client-core.edn")
+
+(def ^:private expected-manifest
+  {:schema 1
+   :library {:id 'jolt-lang/http-client
+             :version instrumentation/http-client-build-id}
+   :aspects
+   [{:id :http-client.core/request
+     :match {:entry 'clj-http.lite.core/request :arity 1}
+     :advice-role :http/client
+     :expect {:matches 1}}]})
+
 (defn- with-memory-sdk [f]
   (let [exporter (memory/multisignal-exporter)
         handle (sdk/init! {:service-name "http-client-instrumentation-test"
@@ -267,14 +283,15 @@
          instrumentation/aspect-provider)))
 
 (deftest provider-version-matches-fetched-library-manifest
-  (let [resource (io/resource "META-INF/jolt/aspects/http-client-core.edn")
+  (let [resource (io/resource aspect-resource)
+        resource-location (str resource)
         manifest (some-> resource slurp edn/read-string)]
     (is (some? resource))
-    (is (= 'jolt-lang/http-client (get-in manifest [:library :id])))
-    (is (= instrumentation/http-client-build-id
-           (get-in manifest [:library :version])))
-    (is (= {:entry 'clj-http.lite.core/request :arity 1}
-           (get-in manifest [:aspects 0 :match])))))
+    ;; The provider does not own or shadow this inert declaration. Its exact
+    ;; library dependency must contribute the resource selected by the compiler.
+    (is (.contains resource-location http-client-revision))
+    (is (.contains resource-location "http-client.git"))
+    (is (= expected-manifest manifest))))
 
 (deftest propagator-scope-is-trace-context-only
   (is (= #{"traceparent" "tracestate"}

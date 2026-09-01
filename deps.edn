@@ -2,7 +2,7 @@
 
  :deps {io.github.casselc/http-client
         {:git/url "https://github.com/casselc/http-client.git"
-         :git/sha "a00979f5e55bc8deb98291993643ff1ccf50a57b"}
+         :git/sha "19d0d1b21ece1d0be3cdd166746cb0df772fbc0a"}
         io.github.casselc/otel
         {:git/url "https://github.com/casselc/otel.git"
          :git/sha "a9badb98a86d4e0aa207aa0609da03dc8e4c087f"}}
