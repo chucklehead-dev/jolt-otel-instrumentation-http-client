@@ -67,14 +67,16 @@ The provider and its library-owned manifest are pinned to exact published
 revisions. From this repository, with the workspace's pinned Chez toolchain:
 
 ```sh
+export ASPECT_JOLT=/absolute/path/to/an/aspect-capable-jolt
+
 env JOLT_GITLIBS_DIR=/home/chuck/.cache/jolt-http-instrumentation-gitlibs \
-  /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 jolt -M:test
+  /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 "$ASPECT_JOLT" -M:test
 
 cd test-app
 env JOLT_CACHE_DIR=/home/chuck/.cache/jolt-http-instrumentation-woven \
   JOLT_GITLIBS_DIR=/home/chuck/.cache/jolt-http-instrumentation-gitlibs \
   /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 \
-  /home/chuck/ai-src/worktrees/jolt-v0728-aspects-ffi-loans/bin/jolt \
+  "$ASPECT_JOLT" \
   build -m instrumentation-fixture.main \
   -o target/woven-http-client-fixture
 
@@ -84,17 +86,19 @@ cd ../test-app-plain
 env JOLT_CACHE_DIR=/home/chuck/.cache/jolt-http-instrumentation-plain \
   JOLT_GITLIBS_DIR=/home/chuck/.cache/jolt-http-instrumentation-gitlibs \
   /home/chuck/ai-src/tools/jolt-with-chez-10.4.1 \
-  /home/chuck/ai-src/worktrees/jolt-v0728-aspects-ffi-loans/bin/jolt \
+  "$ASPECT_JOLT" \
   build -m instrumentation-fixture.main \
   -o target/plain-http-client-fixture
 
 target/plain-http-client-fixture plain
 ```
 
-The released Jolt v0.7.28 runs the provider and unit tests. Compiler-selected
-aspects are newer than that release, so both binary fixtures deliberately use
-the explicit aspect-capable build shown above. Using the same compiler for both
-fixtures proves that selection, rather than classpath presence, controls weaving.
+Jolt v0.8.0 is the minimum runtime for the provider's pinned HTTP client: that
+release changed `ffi/write` to the value-before-offset contract used by its
+native compression path. Compiler-selected aspects are newer than v0.8.0, so
+the provider tests and both binary fixtures deliberately use the explicit
+aspect-capable build shown above. Using the same compiler for both fixtures
+proves that selection, rather than classpath presence, controls weaving.
 
 The compiler fixture makes a real loopback HTTP request. Its server echoes the
 wire `traceparent`, and the application verifies it identifies the generated
