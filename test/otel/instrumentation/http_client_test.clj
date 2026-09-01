@@ -19,7 +19,7 @@
              :version instrumentation/http-client-build-id}})
 
 (def ^:private http-client-revision
-  "19d0d1b21ece1d0be3cdd166746cb0df772fbc0a")
+  "33436d638d86e6eae9269d17ac8df1678b37cf8c")
 
 (def ^:private aspect-resource
   "META-INF/jolt/aspects/http-client-core.edn")
