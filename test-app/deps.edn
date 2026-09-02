@@ -14,6 +14,5 @@
 
  :jolt/build
  {:aspects
-  [{:resource "META-INF/jolt/aspects/http-client-core.edn"
-    :provider otel.instrumentation.http-client}]
+  [{:preset "META-INF/jolt/instrumentation/http-client/basic.edn"}]
   :aspect-report "target/http-client-aspects.edn"}}

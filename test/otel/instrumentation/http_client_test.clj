@@ -276,6 +276,19 @@
     (is (= {:entry 'clj-http.lite.core/request :arity 1}
            (get-in manifest [:aspects 0 :match])))))
 
+(deftest package-owned-basic-preset-selects-the-versioned-provider
+  (let [resource-name
+        "META-INF/jolt/instrumentation/http-client/basic.edn"
+        resource (io/resource resource-name)
+        preset (some-> resource slurp edn/read-string)]
+    (is (some? resource))
+    (is (= {:schema 1
+            :id :otel.http-client/basic
+            :selections
+            [{:resource "META-INF/jolt/aspects/http-client-core.edn"
+              :provider 'otel.instrumentation.http-client}]}
+           preset))))
+
 (deftest propagator-scope-is-trace-context-only
   (is (= #{"traceparent" "tracestate"}
          (set (propagation/fields propagation/trace-context)))))
