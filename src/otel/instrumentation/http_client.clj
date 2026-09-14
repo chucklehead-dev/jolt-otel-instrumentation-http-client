@@ -22,7 +22,7 @@
 (def http-client-build-id
   "Compatibility id of the exact jolt-lang/http-client source seam selected by
   the inert library manifest."
-  "12b78edb9024d200083cf77d61fa56709ab23dd7")
+  "v0.0.10+http-client-core-aspect.1")
 
 (def ^:private instrumentation-version "0.1.0")
 (def ^:private scope-name

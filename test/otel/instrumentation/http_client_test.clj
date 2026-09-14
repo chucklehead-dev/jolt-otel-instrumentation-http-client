@@ -10,6 +10,9 @@
             [otel.sdk :as sdk]
             [otel.trace :as trace]))
 
+(def ^:private http-client-target-sha
+  "eab6b78d5957f88690faf6768360572a3f185341")
+
 (defn- join-point []
   {:id :http-client.core/request
    :advice-role :http/client
@@ -270,11 +273,17 @@
   (let [resource (io/resource "META-INF/jolt/aspects/http-client-core.edn")
         manifest (some-> resource slurp edn/read-string)]
     (is (some? resource))
+    (is (.contains (str resource) http-client-target-sha))
     (is (= 'jolt-lang/http-client (get-in manifest [:library :id])))
     (is (= instrumentation/http-client-build-id
            (get-in manifest [:library :version])))
     (is (= {:entry 'clj-http.lite.core/request :arity 1}
            (get-in manifest [:aspects 0 :match])))))
+
+(deftest provider-target-is-the-merged-http-line
+  (let [deps (edn/read-string (slurp "deps.edn"))]
+    (is (= http-client-target-sha
+           (get-in deps [:deps 'io.github.casselc/http-client :git/sha])))))
 
 (deftest propagator-scope-is-trace-context-only
   (is (= #{"traceparent" "tracestate"}
