@@ -41,7 +41,7 @@ observability-viewer feedback.
 
 ## Select it in a build
 
-Add this package, the matching HTTP client revision, and OTel to the
+Add this package, the matching merged HTTP client revision, and OTel to the
 application dependency graph, then select the library manifest:
 
 ```clojure
@@ -56,10 +56,13 @@ The provider accepts only the manifest's exact source-seam compatibility id.
 A changed HTTP request boundary must publish a new id and be reviewed before it
 can be selected again.
 
-The current platform shim may follow redirects below this semantic entry. Such
-a redirect chain is therefore represented by the one allowed top-level logical
-client span rather than a span per wire attempt. A future attempt-level seam
-can add resend attributes without weakening this stable library contract.
+The current platform shim may follow redirects or retry a stale pooled
+connection below this semantic entry. Such wire attempts are therefore
+represented by the one allowed top-level logical client span, whose duration
+covers the full call. The HTTP client permits automatic stale-connection replay
+only for idempotent methods; non-idempotent ambiguity remains an error. A
+future attempt-level seam can add resend attributes without weakening this
+stable library contract.
 
 ## Verification
 
@@ -93,7 +96,7 @@ env JOLT_CACHE_DIR=/home/chuck/.cache/jolt-http-instrumentation-plain \
 target/plain-http-client-fixture plain
 ```
 
-Jolt v0.8.0 is the minimum runtime for the provider's pinned HTTP client: that
+The pinned HTTP client declares Jolt v0.8.1 as its minimum runtime: that
 release changed `ffi/write` to the value-before-offset contract used by its
 native compression path. Compiler-selected aspects are newer than v0.8.0, so
 the provider tests and both binary fixtures deliberately use the explicit
