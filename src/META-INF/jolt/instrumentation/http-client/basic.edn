@@ -1,0 +1,5 @@
+{:schema 1
+ :id :otel.http-client/basic
+ :selections
+ [{:resource "META-INF/jolt/aspects/http-client-core.edn"
+   :provider otel.instrumentation.http-client}]}

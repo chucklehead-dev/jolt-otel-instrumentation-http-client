@@ -285,6 +285,22 @@
     (is (= http-client-target-sha
            (get-in deps [:deps 'io.github.casselc/http-client :git/sha])))))
 
+(deftest package-owned-basic-preset-selects-the-versioned-provider
+  (let [resource-name "META-INF/jolt/instrumentation/http-client/basic.edn"
+        resource (io/resource resource-name)
+        tracked-text (slurp (str "src/" resource-name))
+        selected-text (some-> resource slurp)
+        selected (some-> selected-text edn/read-string)]
+    (is (some? resource))
+    (is (= tracked-text selected-text)
+        "the selected resource is exactly this checkout's tracked preset")
+    (is (= {:schema 1
+            :id :otel.http-client/basic
+            :selections
+            [{:resource "META-INF/jolt/aspects/http-client-core.edn"
+              :provider 'otel.instrumentation.http-client}]}
+           selected))))
+
 (deftest propagator-scope-is-trace-context-only
   (is (= #{"traceparent" "tracestate"}
          (set (propagation/fields propagation/trace-context)))))

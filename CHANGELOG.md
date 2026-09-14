@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Publish the package-owned `:otel.http-client/basic` preset against the
+  current merged HTTP-client compatibility identity. Applications can select
+  the versioned library manifest and this provider with one stable resource;
+  classpath presence alone still activates nothing.
+
 - Follow the merged `casselc/http-client` v0.0.10 convergence line and its
   library-owned `v0.0.10+http-client-core-aspect.1` compatibility identity.
   The provider continues to consume the existing request seam and adds no

@@ -42,15 +42,19 @@ observability-viewer feedback.
 ## Select it in a build
 
 Add this package, the matching merged HTTP client revision, and OTel to the
-application dependency graph, then select the library manifest:
+application dependency graph, then select the package-owned preset:
 
 ```clojure
 {:jolt/build
  {:aspects
-  [{:resource "META-INF/jolt/aspects/http-client-core.edn"
-    :provider otel.instrumentation.http-client}]
+  [{:preset "META-INF/jolt/instrumentation/http-client/basic.edn"}]
   :aspect-report "target/http-client-aspects.edn"}}
 ```
+
+The preset expands to the library-owned
+`META-INF/jolt/aspects/http-client-core.edn` manifest and this package's
+`otel.instrumentation.http-client` provider. It adds no implicit activation;
+applications still opt in through `:jolt/build :aspects`.
 
 The provider accepts only the manifest's exact source-seam compatibility id.
 A changed HTTP request boundary must publish a new id and be reviewed before it
